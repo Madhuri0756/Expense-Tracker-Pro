@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Tracker Pro</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --surface-0:#f4f6fb;--surface-1:#eef1f8;--surface-2:#ffffff;
+  --text-primary:#111827;--text-secondary:#4b5563;--text-muted:#9ca3af;
+  --border:#e5e7eb;--border-strong:#d1d5db;--border-accent:#3b82f6;--border-success:#16a34a;--border-danger:#dc2626;
+  --bg-accent:#eff6ff;--bg-success:#f0fdf4;--bg-danger:#fef2f2;--bg-warning:#fffbeb;
+  --text-accent:#2563eb;--text-success:#16a34a;--text-danger:#dc2626;--text-warning:#d97706;
+  --fill-accent:#2563eb;--on-accent:#ffffff;
+  --radius:8px;--font-sans:"Segoe UI",system-ui,sans-serif;
+}
+body{font-family:var(--font-sans);background:var(--surface-0);color:var(--text-primary);min-height:100vh}
+.app{display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--surface-2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.logo{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;color:var(--text-primary)}
+.logo i{color:var(--text-accent);font-size:18px}
+.badge{background:var(--bg-accent);color:var(--text-accent);font-size:11px;padding:2px 8px;border-radius:99px;font-weight:500}
+.main{padding:20px 24px;display:flex;flex-direction:column;gap:16px;max-width:1200px;margin:0 auto;width:100%}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.kpi{background:var(--surface-1);border-radius:12px;padding:14px 16px}
+.kpi-label{font-size:12px;color:var(--text-muted);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.kpi-label i{font-size:13px}
+.kpi-value{font-size:22px;font-weight:600}
+.kpi-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+.kpi.accent .kpi-value{color:var(--text-accent)}
+.kpi.success .kpi-value{color:var(--text-success)}
+.kpi.danger .kpi-value{color:var(--text-danger)}
+.kpi.warning .kpi-value{color:var(--text-warning)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.card-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;color:var(--text-primary)}
+.card-title i{color:var(--text-muted);font-size:15px}
+.card-body{padding:16px}
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.form-group label{font-size:12px;color:var(--text-secondary);font-weight:500}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+input,select{width:100%;padding:8px 10px;border-radius:var(--radius);border:1px solid var(--border-strong);background:#fff;color:var(--text-primary);font-size:13px;font-family:var(--font-sans);outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus{border-color:var(--border-accent);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.btn{padding:9px 16px;border-radius:var(--radius);border:none;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-sans);display:inline-flex;align-items:center;gap:6px;transition:opacity .15s,transform .1s}
+.btn:hover{opacity:.85}.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--fill-accent);color:var(--on-accent);width:100%;justify-content:center}
+.btn-sm{padding:5px 9px;font-size:12px}
+.btn-edit{background:var(--bg-success);color:var(--text-success);border:1px solid var(--border-success)}
+.btn-del{background:var(--bg-danger);color:var(--text-danger);border:1px solid var(--border-danger)}
+.search-bar{display:flex;gap:8px;margin-bottom:12px}
+.search-bar input{flex:1}
+.search-bar select{width:auto;flex:0 0 140px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:var(--surface-1)}
+th{padding:10px 12px;text-align:left;font-weight:600;font-size:12px;color:var(--text-muted);border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface-1)}
+.amount-cell{font-weight:600;text-align:right}
+.action-cell{display:flex;gap:6px;justify-content:flex-end}
+.cat-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:99px;font-size:11px;font-weight:500}
+.bar-wrap{margin-bottom:10px}
+.bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;color:var(--text-secondary)}
+.bar-track{background:var(--surface-1);border-radius:99px;height:8px;overflow:hidden}
+.bar-fill{height:100%;border-radius:99px;transition:width .4s ease}
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted)}
+.page-btns{display:flex;gap:4px}
+.page-btn{padding:4px 9px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface-1);cursor:pointer;font-size:12px;color:var(--text-secondary);font-family:var(--font-sans)}
+.page-btn.active{background:var(--fill-accent);color:#fff;border-color:var(--fill-accent)}
+.page-btn:hover:not(.active){background:var(--surface-0)}
+.empty{text-align:center;padding:32px;color:var(--text-muted);font-size:13px}
+.empty i{font-size:32px;display:block;margin-bottom:8px}
+.toast{position:fixed;bottom:20px;right:20px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:99;display:none;align-items:center;gap:8px;color:var(--text-primary)}
+.toast.show{display:flex}
+.toast i{color:var(--text-success)}
+.export-btn{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px;cursor:pointer;color:var(--text-secondary);font-size:13px;font-family:var(--font-sans);display:flex;align-items:center;gap:5px;font-weight:500}
+.export-btn:hover{background:var(--surface-0)}
+@media(max-width:700px){
+  .two-col{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  .search-bar{flex-direction:column}
+  .search-bar select{flex:unset;width:100%}
+  .main{padding:12px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="topbar">
+  <div class="logo">
+    <i class="ti ti-wallet"></i>
+    ExpenseTracker Pro
+    <span class="badge">v2.0</span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <span style="font-size:12px;color:var(--text-muted)" id="dateLabel"></span>
+    <button class="export-btn" onclick="exportCSV()">
+      <i class="ti ti-download"></i> Export CSV
+    </button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    <div class="kpi accent">
+      <div class="kpi-label"><i class="ti ti-report-money"></i> Total expenses</div>
+      <div class="kpi-value" id="kpiTotal">₹0</div>
+      <div class="kpi-sub" id="kpiCount">0 entries</div>
+    </div>
+    <div class="kpi success">
+      <div class="kpi-label"><i class="ti ti-trending-down"></i> Lowest category</div>
+      <div class="kpi-value" id="kpiLow">₹0</div>
+      <div class="kpi-sub" id="kpiLowCat">—</div>
+    </div>
+    <div class="kpi danger">
+      <div class="kpi-label"><i class="ti ti-trending-up"></i> Highest category</div>
+      <div class="kpi-value" id="kpiHigh">₹0</div>
+      <div class="kpi-sub" id="kpiHighCat">—</div>
+    </div>
+    <div class="kpi warning">
+      <div class="kpi-label"><i class="ti ti-receipt"></i> Avg per entry</div>
+      <div class="kpi-value" id="kpiAvg">₹0</div>
+      <div class="kpi-sub">running average</div>
+    </div>
+  </div>
+
+  <!-- Form + Chart -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="ti ti-plus"></i> Add expense</span>
+        <span id="editLabel" style="font-size:11px;color:var(--text-accent);display:none">Editing entry</span>
+      </div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fCat">Category</label>
+            <select id="fCat">
+              <option value="">Select…</option>
+              <option>Food</option><option>Transport</option><option>Shopping</option>
+              <option>Housing</option><option>Healthcare</option><option>Entertainment</option>
+              <option>Education</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="fAmt">Amount (₹)</label>
+            <input type="number" id="fAmt" placeholder="0" min="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="fDesc">Description</label>
+          <input type="text" id="fDesc" placeholder="What was this for?">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fDate">Date</label>
+            <input type="date" id="fDate">
+          </div>
+          <div class="form-group">
+            <label for="fTag">Tag</label>
+            <select id="fTag">
+              <option value="">None</option>
+              <option>Essential</option><option>Discretionary</option><option>Recurring</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="saveEntry()">
+          <i class="ti ti-check"></i>
+          <span id="btnLabel">Save expense</span>
+        </button>
+        <div id="formErr" style="font-size:12px;color:var(--text-danger);margin-top:8px;display:none"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="ti ti-chart-bar"></i> Spending by category</span>
+      </div>
+      <div class="card-body" id="chartArea">
+        <div class="empty"><i class="ti ti-chart-bar"></i>Add expenses to see breakdown</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><i class="ti ti-list"></i> Expense log</span>
+      <span style="font-size:12px;color:var(--text-muted)" id="filteredTotal"></span>
+    </div>
+    <div style="padding:12px 16px;border-bottom:1px solid var(--border)">
+      <div class="search-bar">
+        <input type="text" id="searchIn" placeholder="Search description or category…" oninput="renderTable()">
+        <select id="filterCat" onchange="renderTable()"><option value="">All categories</option></select>
+        <select id="filterTag" onchange="renderTable()">
+          <option value="">All tags</option>
+          <option>Essential</option><option>Discretionary</option><option>Recurring</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Tag</th>
+            <th style="text-align:right">Amount</th>
+            <th style="text-align:right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tBody"></tbody>
+      </table>
+      <div class="pagination">
+        <span id="pageInfo">Showing 0–0 of 0</span>
+        <div class="page-btns" id="pageBtns"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="toast" id="toast"><i class="ti ti-check"></i> <span id="toastMsg"></span></div>
+
+<script>
+const CAT_COLORS = {
+  Food:'#378ADD', Transport:'#1D9E75', Shopping:'#D85A30',
+  Housing:'#BA7517', Healthcare:'#D4537E', Entertainment:'#7F77DD',
+  Education:'#639922', Other:'#888780'
+};
+
+let expenses = [];
+let editIdx = -1;
+let page = 0;
+const PER = 8;
+
+try { expenses = JSON.parse(localStorage.getItem('xp2') || '[]'); } catch(e) {}
+
+document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('en-IN', {
+  weekday:'short', day:'numeric', month:'short', year:'numeric'
+});
+
+function persist() {
+  try { localStorage.setItem('xp2', JSON.stringify(expenses)); } catch(e) {}
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function showErr(msg) {
+  const e = document.getElementById('formErr');
+  e.textContent = msg;
+  e.style.display = msg ? 'block' : 'none';
+}
+
+function saveEntry() {
+  const cat  = document.getElementById('fCat').value;
+  const amt  = parseFloat(document.getElementById('fAmt').value);
+  const desc = document.getElementById('fDesc').value.trim();
+  const date = document.getElementById('fDate').value;
+  const tag  = document.getElementById('fTag').value;
+
+  if (!cat)  { showErr('Select a category'); return; }
+  if (!desc) { showErr('Add a description'); return; }
+  if (!amt || amt <= 0) { showErr('Enter a valid amount'); return; }
+  if (!date) { showErr('Pick a date'); return; }
+  showErr('');
+
+  const entry = { cat, amt, desc, date, tag };
+  if (editIdx >= 0) {
+    expenses[editIdx] = entry;
+    showToast('Entry updated');
+  } else {
+    expenses.unshift(entry);
+    showToast('Expense saved');
+  }
+  editIdx = -1;
+
+  document.getElementById('fCat').value = '';
+  document.getElementById('fAmt').value = '';
+  document.getElementById('fDesc').value = '';
+  document.getElementById('fTag').value = '';
+  document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('editLabel').style.display = 'none';
+  document.getElementById('btnLabel').textContent = 'Save expense';
+
+  persist();
+  page = 0;
+  renderAll();
+}
+
+function editEntry(i) {
+  const e = expenses[i];
+  document.getElementById('fCat').value  = e.cat;
+  document.getElementById('fAmt').value  = e.amt;
+  document.getElementById('fDesc').value = e.desc;
+  document.getElementById('fDate').value = e.date;
+  document.getElementById('fTag').value  = e.tag || '';
+  document.getElementById('editLabel').style.display = 'inline';
+  document.getElementById('btnLabel').textContent = 'Update expense';
+  editIdx = i;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function delEntry(i) {
+  expenses.splice(i, 1);
+  if (editIdx === i) editIdx = -1;
+  persist();
+  renderAll();
+  showToast('Entry deleted');
+}
+
+function getFiltered() {
+  const s = document.getElementById('searchIn').value.toLowerCase();
+  const c = document.getElementById('filterCat').value;
+  const g = document.getElementById('filterTag').value;
+  return expenses.filter(e =>
+    (!c || e.cat === c) &&
+    (!g || e.tag === g) &&
+    (!s || e.desc.toLowerCase().includes(s) || e.cat.toLowerCase().includes(s))
+  );
+}
+
+function renderKPIs() {
+  const total = expenses.reduce((s, e) => s + e.amt, 0);
+  document.getElementById('kpiTotal').textContent = '₹' + total.toLocaleString('en-IN');
+  document.getElementById('kpiCount').textContent = expenses.length + ' entries';
+
+  const byCat = {};
+  expenses.forEach(e => { byCat[e.cat] = (byCat[e.cat] || 0) + e.amt; });
+  const cats = Object.entries(byCat).sort((a, b) => a[1] - b[1]);
+
+  if (cats.length) {
+    document.getElementById('kpiLow').textContent  = '₹' + cats[0][1].toLocaleString('en-IN');
+    document.getElementById('kpiLowCat').textContent = cats[0][0];
+    document.getElementById('kpiHigh').textContent = '₹' + cats[cats.length-1][1].toLocaleString('en-IN');
+    document.getElementById('kpiHighCat').textContent = cats[cats.length-1][0];
+  } else {
+    ['kpiLow','kpiHigh'].forEach(id => document.getElementById(id).textContent = '₹0');
+    ['kpiLowCat','kpiHighCat'].forEach(id => document.getElementById(id).textContent = '—');
+  }
+
+  const avg = expenses.length ? Math.round(total / expenses.length) : 0;
+  document.getElementById('kpiAvg').textContent = '₹' + avg.toLocaleString('en-IN');
+}
+
+function renderChart() {
+  const byCat = {};
+  expenses.forEach(e => { byCat[e.cat] = (byCat[e.cat] || 0) + e.amt; });
+  const total = expenses.reduce((s, e) => s + e.amt, 0);
+  const area = document.getElementById('chartArea');
+
+  if (!total) {
+    area.innerHTML = '<div class="empty"><i class="ti ti-chart-bar"></i>Add expenses to see breakdown</div>';
+    return;
+  }
+
+  const sorted = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+  area.innerHTML = sorted.map(([cat, amt]) => {
+    const pct = Math.round((amt / total) * 100);
+    const col = CAT_COLORS[cat] || '#888780';
+    return `<div class="bar-wrap">
+      <div class="bar-label">
+        <span>${cat}</span>
+        <span>₹${amt.toLocaleString('en-IN')} <span style="color:var(--text-muted)">(${pct}%)</span></span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${pct}%;background:${col}"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderFilters() {
+  const cats = [...new Set(expenses.map(e => e.cat))].sort();
+  const sel = document.getElementById('filterCat');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">All categories</option>' +
+    cats.map(c => `<option${c === cur ? ' selected' : ''}>${c}</option>`).join('');
+}
+
+function renderTable() {
+  const filtered = getFiltered();
+  const total = filtered.reduce((s, e) => s + e.amt, 0);
+  document.getElementById('filteredTotal').textContent =
+    filtered.length ? `₹${total.toLocaleString('en-IN')} shown` : '';
+
+  const pages = Math.max(1, Math.ceil(filtered.length / PER));
+  if (page >= pages) page = pages - 1;
+  const slice = filtered.slice(page * PER, page * PER + PER);
+
+  const tbody = document.getElementById('tBody');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><i class="ti ti-inbox"></i>No expenses found</div></td></tr>';
+  } else {
+    tbody.innerHTML = slice.map(e => {
+      const ri = expenses.indexOf(e);
+      const tagHtml = e.tag
+        ? `<span style="font-size:11px;padding:2px 7px;border-radius:99px;background:var(--surface-0);border:1px solid var(--border);color:var(--text-secondary)">${e.tag}</span>`
+        : `<span style="color:var(--text-muted);font-size:12px">—</span>`;
+      const col = CAT_COLORS[e.cat] || '#888780';
+      const catTag = `<span class="cat-tag" style="background:${col}18;color:${col};border:1px solid ${col}44">${e.cat}</span>`;
+      const d = e.date
+        ? new Date(e.date + 'T00:00:00').toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
+        : '—';
+      return `<tr>
+        <td style="font-size:12px;color:var(--text-muted)">${d}</td>
+        <td>${catTag}</td>
+        <td style="color:var(--text-primary)">${e.desc}</td>
+        <td>${tagHtml}</td>
+        <td class="amount-cell">₹${e.amt.toLocaleString('en-IN')}</td>
+        <td>
+          <div class="action-cell">
+            <button class="btn btn-sm btn-edit" onclick="editEntry(${ri})" title="Edit">
+              <i class="ti ti-edit"></i>
+            </button>
+            <button class="btn btn-sm btn-del" onclick="delEntry(${ri})" title="Delete">
+              <i class="ti ti-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('pageInfo').textContent = filtered.length
+    ? `Showing ${page*PER+1}–${Math.min(page*PER+PER, filtered.length)} of ${filtered.length}`
+    : 'No results';
+
+  document.getElementById('pageBtns').innerHTML = Array.from({ length: pages }, (_, i) =>
+    `<button class="page-btn${i === page ? ' active' : ''}" onclick="goPage(${i})">${i+1}</button>`
+  ).join('');
+}
+
+function goPage(n) { page = n; renderTable(); }
+
+function renderAll() { renderKPIs(); renderChart(); renderFilters(); renderTable(); }
+
+function exportCSV() {
+  const hdr = ['Date','Category','Description','Tag','Amount'];
+  const rows = expenses.map(e => [e.date, e.cat, `"${e.desc}"`, e.tag || '', e.amt]);
+  const csv = [hdr, ...rows].map(r => r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'expenses.csv';
+  a.click();
+  showToast('CSV exported');
+}
+
+// Seed sample data on first load
+if (!expenses.length) {
+  expenses = [
+    {cat:'Food',       amt:1200,  desc:'Weekly groceries',      date:'2025-06-01', tag:'Essential'},
+    {cat:'Transport',  amt:450,   desc:'Metro monthly pass',     date:'2025-06-02', tag:'Recurring'},
+    {cat:'Entertainment',amt:899, desc:'Netflix subscription',   date:'2025-06-03', tag:'Discretionary'},
+    {cat:'Shopping',   amt:3400,  desc:'New sneakers',           date:'2025-06-05', tag:'Discretionary'},
+    {cat:'Healthcare', amt:600,   desc:'Pharmacy',               date:'2025-06-07', tag:'Essential'},
+    {cat:'Education',  amt:2500,  desc:'Online course',          date:'2025-06-10', tag:'Essential'},
+    {cat:'Food',       amt:850,   desc:'Restaurant dinner',      date:'2025-06-12', tag:'Discretionary'},
+    {cat:'Housing',    amt:12000, desc:'Monthly rent',           date:'2025-06-01', tag:'Recurring'},
+    {cat:'Transport',  amt:320,   desc:'Uber rides',             date:'2025-06-15', tag:'Discretionary'},
+    {cat:'Other',      amt:780,   desc:'Phone bill',             date:'2025-06-18', tag:'Recurring'},
+  ];
+  persist();
+}
+
+renderAll();
+</script>
+</body>
+</html>
